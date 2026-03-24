@@ -1,0 +1,26 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="55" fill="#f0fdf4" stroke="#16A34A" stroke-width="2"/>
+  
+  <!-- Bottle shape -->
+  <g transform="translate(60, 60)">
+    <!-- Bottle cap -->
+    <rect x="-8" y="-25" width="16" height="8" rx="2" fill="#16A34A"/>
+    <!-- Bottle neck -->
+    <path d="M -6 -17 L -8 -5 L 8 -5 L 6 -17 Z" fill="#16A34A" opacity="0.8"/>
+    <!-- Bottle body -->
+    <path d="M -8 -5 Q -15 5 -12 20 L 12 20 Q 15 5 8 -5 Z" fill="#16A34A"/>
+    <!-- Plus symbol (medicine) -->
+    <g fill="#ffffff">
+      <rect x="-3" y="-12" width="6" height="14" rx="2"/>
+      <rect x="-8" y="-7" width="16" height="6" rx="2"/>
+    </g>
+    <!-- Reflection for depth -->
+    <ellipse cx="0" cy="15" rx="10" ry="3" fill="rgba(255,255,255,0.3)"/>
+  </g>
+  
+  <!-- Decorative elements -->
+  <circle cx="30" cy="40" r="3" fill="#16A34A" opacity="0.5"/>
+  <circle cx="90" cy="50" r="2" fill="#16A34A" opacity="0.5"/>
+  <circle cx="25" cy="80" r="2.5" fill="#16A34A" opacity="0.5"/>
+</svg>

@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  * {
+    @apply transition-colors duration-200;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #F1F5F9;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #16A34A;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #15803D;
+  }
+}
+
+@layer components {
+  /* Smooth shadows and transitions */
+  .shadow-sm {
+    @apply shadow-[0_1px_2px_rgba(0,0,0,0.05)];
+  }
+
+  .shadow-lg {
+    @apply shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] transition-shadow duration-300;
+  }
+
+  /* Button hover effects */
+  button {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply hover:shadow-lg hover:scale-105 transition-all duration-300;
+  }
+
+  /* Smooth fade in animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    @apply animate-[fadeIn_0.3s_ease-in-out];
+  }
+
+  /* Smooth slide up animation */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .slide-up {
+    @apply animate-[slideUp_0.5s_ease-in-out];
+  }
+
+  /* Shimmer animation for skeleton */
+  @keyframes shimmer {
+    0% {
+      backgroundPosition: 200% 0;
+    }
+    100% {
+      backgroundPosition: -200% 0;
+    }
+  }
+
+  /* Input focus effect */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply ring-2 ring-primary/30 border-primary;
+  }
+}
