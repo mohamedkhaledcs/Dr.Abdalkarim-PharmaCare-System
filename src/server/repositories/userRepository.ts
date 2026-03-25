@@ -1,186 +1,88 @@
-import { supabase } from '@/lib/supabase'
+import fs from 'fs/promises'
+import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
 import { User } from '@/types'
+
+const usersFilePath = path.resolve(process.cwd(), 'data', 'users.json')
+
+type UserWithPassword = User & { password?: string }
+
+async function readUsersFromFile(): Promise<{ users: UserWithPassword[] }> {
+  try {
+    const raw = await fs.readFile(usersFilePath, 'utf-8')
+    return JSON.parse(raw)
+  } catch (error) {
+    return { users: [] }
+  }
+}
+
+async function writeUsersToFile(data: { users: UserWithPassword[] }): Promise<void> {
+  await fs.mkdir(path.dirname(usersFilePath), { recursive: true })
+  await fs.writeFile(usersFilePath, JSON.stringify(data, null, 2), 'utf-8')
+}
 
 export class UserRepository {
   async findAll(): Promise<User[]> {
-    try {
-      console.log('[UserRepository] Finding all users')
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name, email, phone, role, created_at')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('[UserRepository] Error finding all users:', error.message)
-        return []
-      }
-
-      if (!data) {
-        console.warn('[UserRepository] No users found')
-        return []
-      }
-
-      console.log(`[UserRepository] Found ${data.length} users`)
-      return data as User[]
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error finding all users:', error)
-      return []
-    }
+    const db = await readUsersFromFile()
+    return db.users.map(({ password, ...rest }) => rest)
   }
 
   async findByEmail(email: string): Promise<(User & { password: string }) | null> {
-    try {
-      console.log(`[UserRepository] Finding user by email: ${email}`)
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .single()
-
-      if (error) {
-        console.error(`[UserRepository] Error finding user by email:`, error.message)
-        return null
-      }
-
-      if (!data) {
-        console.warn(`[UserRepository] User not found: ${email}`)
-        return null
-      }
-
-      console.log(`[UserRepository] User found: ${email}`)
-      return data as User & { password: string }
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error finding user:', error)
-      return null
-    }
+    const db = await readUsersFromFile()
+    const user = db.users.find(u => u.email === email)
+    if (!user || (!user.password && user.password !== '')) return null
+    return user as User & { password: string }
   }
 
   async findById(id: string): Promise<User | null> {
-    try {
-      console.log(`[UserRepository] Finding user by ID: ${id}`)
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name, email, phone, role, created_at')
-        .eq('id', id)
-        .single()
-
-      if (error) {
-        console.error('[UserRepository] Error finding user by ID:', error.message)
-        return null
-      }
-
-      if (!data) {
-        console.warn(`[UserRepository] User not found with ID: ${id}`)
-        return null
-      }
-
-      console.log(`[UserRepository] User found by ID: ${id}`)
-      return data as User
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error finding user by ID:', error)
-      return null
-    }
+    const db = await readUsersFromFile()
+    const user = db.users.find(u => u.id === id)
+    if (!user) return null
+    const { password, ...rest } = user
+    return rest
   }
 
   async create(user: Omit<User, 'id' | 'created_at'> & { password: string }): Promise<(User & { password: string }) | null> {
     try {
-      console.log(`[UserRepository] Creating user: ${user.email}`)
-      const { data, error } = await supabase
-        .from('users')
-        .insert(user)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('[UserRepository] Error creating user:', error.message)
-        return null
+      const db = await readUsersFromFile()
+      const newUser: UserWithPassword = {
+        ...user,
+        id: uuidv4(),
+        created_at: new Date().toISOString(),
       }
-
-      if (!data) {
-        console.warn('[UserRepository] No data returned after user creation')
-        return null
-      }
-
-      console.log(`[UserRepository] User created: ${user.email}`)
-      return data as User & { password: string }
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error creating user:', error)
-      return null
-    }
+      db.users.unshift(newUser)
+      await writeUsersToFile(db)
+      return newUser as User & { password: string }
+    } catch (e) { return null }
   }
 
   async update(id: string, updates: Partial<User>): Promise<User | null> {
-    try {
-      console.log(`[UserRepository] Updating user: ${id}`)
-      const { data, error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', id)
-        .select('id, name, email, phone, role, created_at')
-        .single()
-
-      if (error) {
-        console.error('[UserRepository] Error updating user:', error.message)
-        return null
-      }
-
-      if (!data) {
-        console.warn(`[UserRepository] User not found for update: ${id}`)
-        return null
-      }
-
-      console.log(`[UserRepository] User updated: ${id}`)
-      return data as User
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error updating user:', error)
-      return null
-    }
+    const db = await readUsersFromFile()
+    const index = db.users.findIndex(u => u.id === id)
+    if (index === -1) return null
+    
+    db.users[index] = { ...db.users[index], ...updates }
+    await writeUsersToFile(db)
+    
+    const { password, ...rest } = db.users[index]
+    return rest
   }
 
   async delete(id: string): Promise<boolean> {
-    try {
-      console.log(`[UserRepository] Deleting user: ${id}`)
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', id)
-
-      if (error) {
-        console.error('[UserRepository] Error deleting user:', error.message)
-        return false
-      }
-
-      console.log(`[UserRepository] User deleted: ${id}`)
+    const db = await readUsersFromFile()
+    const initialLength = db.users.length
+    db.users = db.users.filter(u => u.id !== id)
+    
+    if (db.users.length < initialLength) {
+      await writeUsersToFile(db)
       return true
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error deleting user:', error)
-      return false
     }
+    return false
   }
 
   async findByRole(role: 'admin' | 'cashier' | 'user'): Promise<User[]> {
-    try {
-      console.log(`[UserRepository] Finding users with role: ${role}`)
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, name, email, phone, role, created_at')
-        .eq('role', role)
-
-      if (error) {
-        console.error('[UserRepository] Error finding users by role:', error.message)
-        return []
-      }
-
-      if (!data) {
-        console.warn(`[UserRepository] No users found with role: ${role}`)
-        return []
-      }
-
-      console.log(`[UserRepository] Found ${data.length} users with role: ${role}`)
-      return data as User[]
-    } catch (error) {
-      console.error('[UserRepository] Unexpected error finding users by role:', error)
-      return []
-    }
+    const db = await readUsersFromFile()
+    const users = db.users.filter(u => u.role === role)
+    return users.map(({ password, ...rest }) => rest)
   }
 }

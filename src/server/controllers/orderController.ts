@@ -59,10 +59,15 @@ export async function getUserOrders(request: NextRequest) {
   if (auth instanceof NextResponse) return auth
 
   try {
-    console.log('[OrderController] GET /api/orders - Getting user orders:', auth.id)
-    const orders = await orderService.getOrdersByUserId(auth.id)
-    console.log('[OrderController] Found', orders.length, 'orders for user:', auth.id)
-    return NextResponse.json(orders)
+    if (auth.role === 'admin' || auth.role === 'super_admin') {
+      console.log('[OrderController] GET /api/orders - Getting ALL orders for admin')
+      const orders = await orderService.getAllOrders()
+      return NextResponse.json(orders)
+    } else {
+      console.log('[OrderController] GET /api/orders - Getting user orders:', auth.id)
+      const orders = await orderService.getOrdersByUserId(auth.id)
+      return NextResponse.json(orders)
+    }
   } catch (error) {
     console.error('[OrderController] Error getting user orders:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

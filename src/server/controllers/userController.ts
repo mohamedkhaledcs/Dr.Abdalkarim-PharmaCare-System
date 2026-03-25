@@ -42,7 +42,7 @@ export async function getUser(request: NextRequest, { params }: { params: { id: 
 }
 
 export async function createUser(request: NextRequest) {
-  const auth = await roleMiddleware('super_admin')(request)
+  const auth = await roleMiddleware('admin')(request)
   if (auth instanceof NextResponse) return auth
 
   try {
@@ -63,7 +63,7 @@ export async function createUser(request: NextRequest) {
 }
 
 export async function updateUser(request: NextRequest) {
-  const auth = await roleMiddleware('super_admin')(request)
+  const auth = await roleMiddleware('admin')(request)
   if (auth instanceof NextResponse) return auth
 
   try {
@@ -89,7 +89,7 @@ export async function updateUser(request: NextRequest) {
 }
 
 export async function deleteUser(request: NextRequest) {
-  const auth = await roleMiddleware('super_admin')(request)
+  const auth = await roleMiddleware('admin')(request)
   if (auth instanceof NextResponse) return auth
 
   try {

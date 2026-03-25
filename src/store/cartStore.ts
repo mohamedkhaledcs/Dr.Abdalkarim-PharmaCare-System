@@ -5,14 +5,13 @@ import { Product } from '@/types'
 interface CartItem {
   product: Product
   quantity: number
-  type: 'box' | 'strip'
 }
 
 interface CartState {
   items: CartItem[]
-  addItem: (product: Product, quantity: number, type: 'box' | 'strip') => void
-  removeItem: (productId: string, type?: 'box' | 'strip') => void
-  updateQuantity: (productId: string, type: 'box' | 'strip', quantity: number) => void
+  addItem: (product: Product, quantity?: number) => void
+  removeItem: (productId: string) => void
+  updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
   getTotal: () => number
 }
@@ -21,32 +20,31 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (product, quantity, type) => {
-        const items = get().items
-        const existing = items.find(item => item.product.id === product.id && item.type === type)
-        if (existing) {
-          existing.quantity += quantity
-          set({ items: [...items] })
+      addItem: (product, quantity = 1) => {
+        const items = [...get().items]
+        const existingInfo = items.findIndex(item => item.product.id === product.id)
+        if (existingInfo !== -1) {
+          items[existingInfo].quantity += quantity
+          set({ items })
         } else {
-          set({ items: [...items, { product, quantity, type }] })
+          set({ items: [...items, { product, quantity }] })
         }
       },
-      removeItem: (productId, type) => {
-        set({ items: get().items.filter(item => item.product.id !== productId || (type ? item.type !== type : false)) })
+      removeItem: (productId) => {
+        set({ items: get().items.filter(item => item.product.id !== productId) })
       },
-      updateQuantity: (productId, type, quantity) => {
-        const items = get().items
-        const item = items.find(item => item.product.id === productId && item.type === type)
-        if (item) {
-          item.quantity = quantity
-          set({ items: [...items] })
+      updateQuantity: (productId, quantity) => {
+        const items = [...get().items]
+        const itemIndex = items.findIndex(item => item.product.id === productId)
+        if (itemIndex !== -1) {
+          items[itemIndex].quantity = quantity
+          set({ items })
         }
       },
       clearCart: () => set({ items: [] }),
       getTotal: () => {
         return get().items.reduce((total, item) => {
-          const price = item.type === 'box' ? item.product.price_box : item.product.price_strip
-          return total + price * item.quantity
+          return total + (item.product.price_box || 0) * item.quantity
         }, 0)
       },
     }),

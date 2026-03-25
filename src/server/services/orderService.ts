@@ -53,6 +53,16 @@ export class OrderService {
     }
   }
 
+  async getAllOrders(): Promise<Order[]> {
+    try {
+      console.log('[OrderService] Getting all orders')
+      return await orderRepository.findAll()
+    } catch (error) {
+      console.error('[OrderService] Error getting all orders:', error)
+      return []
+    }
+  }
+
   async updateOrderStatus(id: string, status: Order['status']): Promise<Order | null> {
     try {
       console.log('[OrderService] Updating order', id, 'status to:', status)
